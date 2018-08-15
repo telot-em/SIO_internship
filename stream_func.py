@@ -19,11 +19,17 @@ load_path2='/data/SO12/runs/RUN_BLING_Dec2017/SO12_RUN/DIAGNOSTICS/'
 load_path3='/data/soccom/GRID_12/'
 folder = '/home/ebent/Octopus/Octopus-master/grid/'
 
+
+f = h5py.File(load_path3 + 'grid.mat','r')
+DYG = np.array(f.get('DYG'))
+hFacW = np.array(f.get('hFacW'))
+DRF = np.squeeze(np.array(f.get('DRF')))
+
 #lon_min   = 900 
 #lon_max   = 902 # 3240 si comme dans Traj_big_domain
 #lat_min   = 512
 #lat_max   = 514 # 1023 si comme dans Traj_big_domain
-
+'''
 nz,ny,nx = 104,1024,1801
 
 fn1 = 'DYG.data'
@@ -40,7 +46,7 @@ hFacW = np.reshape(hFacW, [nz,ny,nx])
 
 # 1D
 DRF = np.fromfile(os.path.join(folder, fn3),'>f4')
-
+'''
 
 
 # This is hFacC for the SOUTHERN HEMISPHERE
@@ -53,13 +59,15 @@ Xf = np.array(Xf)
 Yf = file_h.get('YC')
 Yf = np.array(Yf)
 
-# These are the indexes when taking the same size as in Matlab
-lon_min   = 1440 
-lon_max   = 3241 # 3240 si comme dans Traj_big_domain
+# Crop to the domain I want
+lon_min   = 1320 # 110 deg ------- #1440 : same size as in Matlab
+lon_max   = 3601 # 300 deg ------- #3241 : same size as in Matlab # 3240 : si comme dans Traj_big_domain
 lat_min   = 0 
-lat_max   = 1024 # 1023 si comme dans Traj_big_domain
+lat_max   = 1202 # -25 deg ------- #1024 : same size as in Matlab # 1023 si comme dans Traj_big_domain
 
 hfacc = hFacC[:, lat_min:lat_max, lon_min:lon_max]
+DYG = DYG[lat_min:lat_max, lon_min:lon_max]
+hFacW = hFacW[:,lat_min:lat_max, lon_min:lon_max]
 #DYG = DYG[lat_min:lat_max, lon_min:lon_max]
 #hFacW = hFacW[:, lat_min:lat_max, lon_min:lon_max]
 
@@ -105,12 +113,12 @@ for k in range(1,mean_uvel.shape[0]):
 	tmp2 = tmp2 + tmp3*DYG*hFacW[k,:,:]*DRF[k] # integrate in z
         #print tmp2
 
-pickle_save('tmp2', '/data/ebent/', tmp2)
+pickle_save('tmp2_for_SF_3', '/data/ebent/', tmp2)
 
 tmp2 = np.cumsum(tmp2, axis=0) # cumulative integral in y
 tmp2[np.where(hfacc[0,...]==0)] = np.nan # masks 0s
 SF = tmp2*1e-6 # converts from m3/s to Sv
-pickle_save('SF_2', '/data/ebent', SF)
-pickle_save('mean_uvel_2', '/data/ebent', mean_uvel)
+pickle_save('SF_3', '/data/ebent/', SF)
+pickle_save('mean_uvel_3', '/data/ebent', mean_uvel)
 
 
